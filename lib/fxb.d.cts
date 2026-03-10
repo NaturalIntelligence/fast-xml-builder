@@ -1,3 +1,4 @@
+const { Expression } = require('path-expression-matcher');
 
 
 type XmlBuilderOptions = {
@@ -111,9 +112,13 @@ type XmlBuilderOptions = {
   /**
    * Nodes to stop parsing at
    * 
+   * Accepts string patterns or Expression objects from path-expression-matcher
+   * 
+   * String patterns starting with "*." are automatically converted to ".." for backward compatibility
+   * 
    * Defaults to `[]`
    */
-  stopNodes?: string[];
+  stopNodes?: (string | Expression)[];
 
   /**
    * Control how tag value should be parsed. Called only if tag value is not empty

@@ -322,6 +322,69 @@ describe("XMLBuilder", function () {
         expect(result).toEqual(expected);
     });
 
+    it("should not process stop nodes when preserveOrder is true", function () {
+        const jObj = [
+            {
+                "html": [
+                    {
+                        "head": [
+                            {
+                                "script": [
+                                    {
+                                        "#text": "\n              window.dataLayer = window.dataLayer || [];\n              function gtag(){dataLayer.push(arguments);}\n            "
+                                    }
+                                ]
+                            },
+                            {
+                                "style": [
+                                    {
+                                        "#text": "\n              .CodeMirror{\n                height: 100%;\n                width: 100%;\n              }\n            "
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "body": [
+                            {
+                                "h1": [
+                                    {
+                                        "#text": "Heading"
+                                    }
+                                ]
+                            },
+                            {
+                                "hr": []
+                            },
+                            {
+                                "pre": [
+                                    {
+                                        "#text": "\n              <h1>Nested</h1>\n            "
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                ":@": {
+                    "@_lang": "en"
+                }
+            }
+        ];
+
+        const builderOptions = {
+            preserveOrder: true,
+            stopNodes: ["..pre", "..script", "..style"],
+        };
+
+
+        const builder = new XMLBuilder(builderOptions);
+        let output = builder.build(jObj);
+
+        expect(output).toContain('window.dataLayer');
+        expect(output).toContain('.CodeMirror');
+        expect(output).toContain('<h1>Nested</h1>');
+    });
 
 });
 
@@ -349,5 +412,6 @@ describe("XMLBuilder- array processing issue", function () {
         expect(result).toContain('<hello>world</hello>');
         expect(result).toContain('<foo>');
     });
+
 
 });

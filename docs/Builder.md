@@ -296,6 +296,31 @@ As you set `stopNodes` to the XML parser configuration to avoid parsing and proc
 
 This property is currently supported with `preserveOrder: true` option only.
 
+A stop node can have raw content along with attributes. It is not expected to have child nodes, cdata, comments or any other property.
+
+Eg
+
+```js
+{
+    "fix1": {
+        "#text": "<p>p 1</p><div class=\"show\">div 1</div>",
+        "lang": "en"
+    },
+    "fix2": "<p>p 2</p><div class=\"show\">div 2</div>"
+}
+```
+
+If preserveOrder is set then the input structure would be different
+
+```js
+[{
+    root: [
+        { foo: [{ '#text': '' }] },
+        { bar: [{ '#text': '' }] }
+    ]
+}]
+```
+
 ## suppressBooleanAttributes
 You can parse attributes with value `true` without their value.
 
