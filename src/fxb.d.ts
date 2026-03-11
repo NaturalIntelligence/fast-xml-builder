@@ -156,7 +156,15 @@ export type XmlBuilderOptions = {
   oneListGroup?: boolean;
 };
 
-export class XMLBuilder {
-  constructor(options?: XmlBuilderOptions);
+export interface XMLBuilder {
   build(jObj: any): string;
 }
+
+export interface XMLBuilderConstructor {
+  new(options?: XmlBuilderOptions): XMLBuilder;
+  (options?: XmlBuilderOptions): XMLBuilder;
+}
+
+declare const Builder: XMLBuilderConstructor;
+
+export default Builder;

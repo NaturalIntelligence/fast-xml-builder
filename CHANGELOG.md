@@ -1,5 +1,9 @@
 
 
+
+**1.1.2** (2026-03-11)
+- fix typings
+
 **1.1.1** (2026-03-11)
 - upgrade path-expression-matcher to 1.1.3
 

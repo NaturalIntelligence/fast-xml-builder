@@ -157,16 +157,15 @@ type XmlBuilderOptions = {
   oneListGroup?: boolean;
 };
 
-declare class XMLBuilder {
-  constructor(options?: XmlBuilderOptions);
+interface XMLBuilder {
   build(jObj: any): string;
 }
 
-declare namespace fxpBuilder {
-  export {
-    XMLBuilder,
-    XmlBuilderOptions,
-  }
+interface XMLBuilderConstructor {
+  new(options?: XmlBuilderOptions): XMLBuilder;
+  (options?: XmlBuilderOptions): XMLBuilder;
 }
 
-export = fxpBuilder;
+declare const Builder: XMLBuilderConstructor;
+
+export = Builder;
