@@ -36,6 +36,7 @@ const defaultOptions = {
   // transformTagName: false,
   // transformAttributeName: false,
   oneListGroup: false,
+  maxNestedTags: 100,
   jPath: true  // When true, callbacks receive string jPath; when false, receive Matcher instance
 };
 
@@ -111,7 +112,9 @@ Builder.prototype.build = function (jObj) {
 Builder.prototype.j2x = function (jObj, level, matcher) {
   let attrStr = '';
   let val = '';
-
+  if (this.options.maxNestedTags && matcher.getDepth() >= this.options.maxNestedTags) {
+    throw new Error("Maximum nested tags exceeded");
+  }
   // Get jPath based on option: string for backward compatibility, or Matcher for new features
   const jPath = this.options.jPath ? matcher.toString() : matcher;
 

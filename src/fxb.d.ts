@@ -1,4 +1,7 @@
-import { Expression } from 'path-expression-matcher';
+// import { Expression } from 'path-expression-matcher';
+
+type Matcher = unknown;
+type Expression = unknown;
 
 export type XmlBuilderOptions = {
   /**
@@ -154,6 +157,13 @@ export type XmlBuilderOptions = {
 
 
   oneListGroup?: boolean;
+
+  /**
+   * Maximum number of nested tags
+   * 
+   * Defaults to `100`
+   */
+  maxNestedTags?: number;
 };
 
 export interface XMLBuilder {

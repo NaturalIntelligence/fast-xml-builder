@@ -37,6 +37,9 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
     let xmlStr = "";
     let isPreviousElementTag = false;
 
+    if (options.maxNestedTags && matcher.getDepth() > options.maxNestedTags) {
+        throw new Error("Maximum nested tags exceeded");
+    }
 
     if (!Array.isArray(arr)) {
         // Non-array values (e.g. string tag values) should be treated as text content
@@ -113,6 +116,7 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
         if (isStopNode) {
             tagValue = getRawContent(tagObj[tagName], options);
         } else {
+
             tagValue = arrToStr(tagObj[tagName], options, newIdentation, matcher, stopNodeExpressions);
         }
 

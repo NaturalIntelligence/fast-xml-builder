@@ -257,6 +257,18 @@ Result:
 ## indentBy
 Applicable only if `format:true` is set.
 
+## maxNestedTags
+
+Though it is not recommended to use deeply nested JSON, but if you are using it then you can set `maxNestedTags` option to limit the nesting depth.
+
+```js
+const options = {
+    maxNestedTags: 10
+};
+const builder = new XMLBuilder(options);
+const xmlOutput = builder.build(jsonData);
+```
+
 ## preserveOrder
 When you parse a XML using XMLParser with `preserveOrder: true`, the result JS object has different structure. So parse that structure in original XML, you should set the same option while building the XML from that js object.
 

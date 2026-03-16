@@ -1,5 +1,7 @@
-const { Expression } = require('path-expression-matcher');
+// const { Expression } = require('path-expression-matcher');
 
+type Matcher = unknown;
+type Expression = unknown;
 
 type XmlBuilderOptions = {
   /**
@@ -155,6 +157,13 @@ type XmlBuilderOptions = {
 
 
   oneListGroup?: boolean;
+
+  /**
+   * Maximum number of nested tags
+   * 
+   * Defaults to `100`
+   */
+  maxNestedTags?: number;
 };
 
 interface XMLBuilder {
