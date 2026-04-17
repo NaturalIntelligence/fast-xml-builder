@@ -124,6 +124,21 @@ describe("XMLBuilder", function () {
         const expected = `<a></a><b></b>`;
         expect(result).toEqual(expected);
     });
+    it('should parse to XML with malicious CDATA', function () {
+        const jObj = {
+            a: {
+                $cdata: null,
+            },
+            b: {
+                $cdata: "Content]]>script<![CDATA[more",
+            },
+        };
+        const expected = `<a></a><b><![CDATA[Content]]]]><![CDATA[>script<![CDATA[more]]></b>`;
+        const builder = new XMLBuilder({ cdataPropName: '$cdata' });
+        const result = builder.build(jObj);
+        // console.log(result);
+        expect(result).toEqual(expected);
+    });
 
     it("should parse to XML with attributes as separate node", function () {
         const jObj = {
