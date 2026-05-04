@@ -1,6 +1,9 @@
 
 
 
+**1.1.7** (2026--05-04)
+- fix security issues when attribute value contains quotes
+
 **1.1.6** (2026--05-04)
 - fix security issues related to comment
 - skip comment with null value
