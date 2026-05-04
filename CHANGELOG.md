@@ -1,3 +1,13 @@
+
+
+
+**1.1.6** (2026--05-04)
+- fix security issues related to comment
+- skip comment with null value
+
+**1.1.5** (2026-04-17)
+- fix security issues related to comment and cdata
+
 **1.1.4** (2026-03-16)
 - support maxNestedTags option
 
