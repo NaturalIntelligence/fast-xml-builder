@@ -1,4 +1,5 @@
 import { Expression, Matcher } from 'path-expression-matcher';
+import { safeComment, safeCdata } from "./util.js";
 
 const EOL = "\n";
 
@@ -83,16 +84,14 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
                 xmlStr += indentation;
             }
             const val = tagObj[tagName][0][options.textNodeName];
-            const safeVal = String(val).replace(/\]\]>/g, ']]]]><![CDATA[>');
+            const safeVal = safeCdata(val);
             xmlStr += `<![CDATA[${safeVal}]]>`;
             isPreviousElementTag = false;
             matcher.pop();
             continue;
         } else if (tagName === options.commentPropName) {
             const val = tagObj[tagName][0][options.textNodeName]
-            const safeVal = String(val)
-                .replace(/--/g, '- -')   // -- is illegal anywhere in comment content
-                .replace(/-$/, '- ');    // trailing - would form -- with the closing -->
+            const safeVal = safeComment(val)
             xmlStr += indentation + `<!--${safeVal}-->`;
             isPreviousElementTag = true;
             matcher.pop();
