@@ -273,7 +273,9 @@ const xmlOutput = builder.build(jsonData);
 When you parse a XML using XMLParser with `preserveOrder: true`, the result JS object has different structure. So parse that structure in original XML, you should set the same option while building the XML from that js object.
 
 ## processEntities
-Set it to `true` (default) to process XML entities. Check [Entities](./5.Entities.md) section for more detail. If you don't have entities in your XML document then it is recommended to disable it `processEntities: false` for better performance.
+Set it to `true` (default) to process XML entities. If you don't have entities in your XML document then it is recommended to disable it `processEntities: false` for better performance.
+
+For security reasons, single quote and double quote in attribute values are always encoded to `&apos;` and `&quot;` respectively.
 
 ## oneListGroup
 

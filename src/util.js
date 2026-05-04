@@ -10,3 +10,7 @@ export function safeComment(val) {
 export function safeCdata(val) {
   return String(val).replace(/\]\]>/g, ']]]]><![CDATA[>')
 }
+
+export function escapeAttribute(val) {
+  return String(val).replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+}
