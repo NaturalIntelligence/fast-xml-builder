@@ -1,6 +1,10 @@
 
 
 
+**1.1.8** (2026-05-05)
+- fix: skip text property for PI tags
+- improve typings
+
 **1.1.7** (2026--05-04)
 - fix security issues when attribute value contains quotes
 
