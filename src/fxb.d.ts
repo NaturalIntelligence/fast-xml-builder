@@ -177,4 +177,5 @@ export interface XMLBuilderConstructor {
 
 declare const Builder: XMLBuilderConstructor;
 
+export { Builder };
 export default Builder;
