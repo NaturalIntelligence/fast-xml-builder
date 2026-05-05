@@ -1,7 +1,7 @@
 
 import XMLBuilder from "../src/fxb.js";
 
-describe("Builder", function () {
+describe("Processing Instruction Tag", function () {
 
   it("should process PI tag without attributes", function () {
     const xmlData = `
@@ -289,6 +289,76 @@ describe("Builder", function () {
     const builder = new XMLBuilder(options);
     const output = builder.build(jsObj);
     // console.log("something", output);
+    expect(output.replace(/\s+/g, "")).toEqual(xmlData.replace(/\s+/g, ""));
+  });
+
+  it("should ignore text when preserve order", function () {
+    const xmlData = `
+      <?xml version="1.0"?>
+      <?mso-contentType?>
+      <h1></h1>
+      `;
+    const jsObj = [
+      {
+        "?xml": [
+          {
+            "#text": "anything"
+          }
+        ],
+        ":@": {
+          "@_version": "1.0"
+        }
+      },
+      {
+        "?mso-contentType": [
+          {
+            "#text": "something"
+          }
+        ]
+      },
+      {
+        "h1": []
+      }
+    ]
+    const options = {
+      ignoreAttributes: false,
+      format: true,
+      preserveOrder: true,
+    };
+
+    const builder = new XMLBuilder(options);
+    const output = builder.build(jsObj);
+    // console.log(output);
+    expect(output.replace(/\s+/g, "")).toEqual(xmlData.replace(/\s+/g, ""));
+  });
+  it("should ignore text", function () {
+    const xmlData = `
+      <?xml version="1.0"?>
+      <?mso-contentType version="1.0"?>
+      <h1></h1>
+      `;
+    const jsObj = {
+      "?xml": {
+        "#text": "anything",
+        "@_version": "1.0"
+      },
+      "?mso-contentType": {
+        "#text": "something",
+        "@_version": "1.0"
+      },
+      "h1": {
+        "#text": ""
+      }
+    }
+    const options = {
+      ignoreAttributes: false,
+      format: true,
+      preserveOrder: false,
+    };
+
+    const builder = new XMLBuilder(options);
+    const output = builder.build(jsObj);
+    // console.log(output);
     expect(output.replace(/\s+/g, "")).toEqual(xmlData.replace(/\s+/g, ""));
   });
 });

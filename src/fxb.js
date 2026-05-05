@@ -277,7 +277,11 @@ function processTextOrObjNode(object, key, level, matcher) {
   // Pop tag from matcher after recursion
   matcher.pop();
 
-  if (object[this.options.textNodeName] !== undefined && Object.keys(object).length === 1) {
+  // PI/XML-declaration tags must never emit text content — route through
+  // buildTextValNode which correctly ignores the text node for "?" tags.
+  if (key[0] === '?') {
+    return this.buildTextValNode('', key, result.attrStr, level, matcher);
+  } else if (object[this.options.textNodeName] !== undefined && Object.keys(object).length === 1) {
     return this.buildTextValNode(object[this.options.textNodeName], key, result.attrStr, level, matcher);
   } else {
     return this.buildObjectNode(result.val, key, result.attrStr, level);
@@ -426,8 +430,10 @@ Builder.prototype.buildObjectNode = function (val, key, attrStr, level) {
     else {
       return this.indentate(level) + '<' + key + attrStr + this.closeTag(key) + this.tagEndChar;
     }
+  } else if (key[0] === "?") {
+    // PI/XML-declaration tags never have body content — treat them like empty.
+    return this.indentate(level) + '<' + key + attrStr + '?' + this.tagEndChar;
   } else {
-
     let tagEndExp = '</' + key + this.tagEndChar;
     let piClosingChar = "";
 

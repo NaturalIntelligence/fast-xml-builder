@@ -99,9 +99,9 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions) {
         } else if (tagName[0] === "?") {
             const attStr = attr_to_str(tagObj[":@"], options, isStopNode);
             const tempInd = tagName === "?xml" ? "" : indentation;
-            let piTextNodeName = tagObj[tagName][0][options.textNodeName];
-            piTextNodeName = piTextNodeName.length !== 0 ? " " + piTextNodeName : ""; //remove extra spacing
-            xmlStr += tempInd + `<${tagName}${piTextNodeName}${attStr}?>`;
+            // Text node content on PI/XML declaration tags is intentionally ignored.
+            // Only attributes are valid on these tags per the XML spec.
+            xmlStr += tempInd + `<${tagName}${attStr}?>`;
             isPreviousElementTag = true;
             matcher.pop();
             continue;
