@@ -480,3 +480,39 @@ let result = parser.parse(XMLdata);
 const builder = new XMLBuilder(options);
 const output = builder.build(result);
 ```
+
+---
+
+# Round-tripping XML → JSON → XML (XML declaration)
+
+If your input XML contains a declaration like `<?xml version="1.0"?>`, the fast-xml-parser may include it in the output JSON as a `"?xml"` property (unless disabled).  
+When converting the JSON back to XML, you may want to omit this node to avoid invalid output (e.g., “XML declaration allowed only at the start of the document”).
+
+
+*Option A (recommended): ignore the declaration while parsing**
+```js
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
+
+const parser = new XMLParser({ ignoreDeclaration: true });
+const builder = new XMLBuilder();
+
+const obj = parser.parse(xmlInput);
+const xmlOutput = builder.build(obj);
+```
+**Option B: Remove the XML declaration node before building**
+
+If you need to preserve the XML declaration during parsing but want to prevent it from being re-emitted during JSON → XML conversion, you can remove the `"?xml"` node before building:
+
+```js
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
+
+const parser = new XMLParser();
+const builder = new XMLBuilder();
+
+const obj = parser.parse(xmlInput);
+
+// Remove XML declaration before building
+delete obj["?xml"];
+
+const xmlOutput = builder.build(obj);
+```
