@@ -1,8 +1,7 @@
 "use strict";
 
-import { XMLParser } from "fast-xml-parser";
 import XMLBuilder from "../src/fxb.js";
-import he from "he";
+import { EntityEncoder } from "@nodable/entities";
 
 describe("XMLBuilder", function () {
 
@@ -311,6 +310,7 @@ describe("XMLBuilder", function () {
     });
 
     it("should not double encode tag values for an array node", function () {
+        const entityEncoder = new EntityEncoder();
         const jObj = {
             a: {
                 element: {
@@ -341,8 +341,8 @@ describe("XMLBuilder", function () {
             attributesGroupName: "@",
             processEntities: false,
             format: true,
-            tagValueProcessor: (tagName, a) => { a = '' + a; return he.encode(a, { useNamedReferences: true }) },
-            attributeValueProcessor: (attrName, a) => he.encode(a, { isAttributeValue: true, useNamedReferences: true }),
+            tagValueProcessor: (tagName, a) => { a = '' + a; return entityEncoder.encode(a) },
+            attributeValueProcessor: (attrName, a) => entityEncoder.encode(a),
             attributeNamePrefix: '',
             ignoreAttributes: false,
             suppressEmptyNode: true
