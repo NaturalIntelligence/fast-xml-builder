@@ -1,0 +1,8 @@
+- [ ] Update changelog
+- [ ] Update package.json
+- [ ] Update package-lock.json
+- [ ] Update README.md or DOCS
+- [ ] Update typings
+- [ ] Generate Browser bundles
+- [ ] Create release tag
+- [ ] Push to Github
