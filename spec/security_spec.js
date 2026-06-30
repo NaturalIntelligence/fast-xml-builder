@@ -46,6 +46,22 @@ describe("XMLBuilder", function () {
     // console.log(result);
     expect(result).toEqual(expected);
   });
+  it('should neutralize double hyphen in multi-key comment object', function () {
+    const jObj = {
+      root: {
+        $comment: { "#text": "a--b", note: "x" },
+      },
+    };
+    // The string/single-key comment path already neutralizes "--" via safeComment.
+    // The multi-key object path must produce the same well-formed comment body so
+    // the output cannot contain the literal "--" forbidden by XML 1.0 5e §2.5.
+    const expected = `<root><!--a- -b<note>x</note>--></root>`;
+    const builder = new XMLBuilder({ commentPropName: '$comment', format: false });
+    const result = builder.build(jObj);
+    // console.log(result);
+    expect(result).toEqual(expected);
+    expect(result).not.toContain('--b');
+  });
   it('should esxape double quote in attribute value', function () {
     const jObj = {
       a: {
