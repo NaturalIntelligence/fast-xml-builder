@@ -101,4 +101,48 @@ describe("XMLBuilder", function () {
     // console.log(result);
     expect(result).toEqual(expected);
   });
+
+  it('should escape quote in a stopNode attribute value', function () {
+    const jObj = {
+      root: {
+        div: {
+          "#text": "<b>raw</b>",
+          "@_class": '" onmouseover="alert(1)'
+        }
+      }
+    };
+    const expected = `<root><div class="&quot; onmouseover=&quot;alert(1)"><b>raw</b></div></root>`;
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      stopNodes: ["..div"],
+      processEntities: false
+    });
+    const result = builder.build(jObj);
+    // stopNode content stays raw, but the quote delimiter must still be escaped
+    // (same output as preserveOrder: true below)
+    expect(result).toEqual(expected);
+  });
+
+  it('should escape quote in a stopNode attribute value when order was preserved', function () {
+    const jObj = [
+      {
+        "root": [
+          {
+            "div": [{ "#text": "<b>raw</b>" }],
+            ":@": { "@_class": '" onmouseover="alert(1)' }
+          }
+        ]
+      }
+    ];
+    const expected = `<root><div class="&quot; onmouseover=&quot;alert(1)"><b>raw</b></div></root>`;
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+      stopNodes: ["root.div"],
+      processEntities: false,
+      preserveOrder: true
+    });
+    const result = builder.build(jObj);
+    expect(result).toEqual(expected);
+  });
 });
