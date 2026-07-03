@@ -1,4 +1,7 @@
 
+**1.2.1** (2026-07-03)
+- fix: escape quotes in stopNode attribute values (By [greymoth](https://github.com/greymoth-jp))
+- fix: neutralize double hyphen in multi-key comment object (By [spokodev](https://github.com/spokodev))
 
 
 **1.2.0** (2026-05-08)
