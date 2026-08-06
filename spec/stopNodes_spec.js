@@ -192,6 +192,18 @@ describe("stopNodes Builder - Basic Tests", function () {
       expect(output).toContain("<fix1><nested>str</nested></fix1>");
     });
 
+    it("should preserve the sign of a negative zero value in raw stopNode content", function () {
+      const options = {
+        stopNodes: ["a"],
+        preserveOrder: false
+      };
+
+      const builder = new XMLBuilder(options);
+      const output = builder.build({ a: -0 });
+
+      expect(output).toEqual("<a>-0</a>");
+    });
+
   });
 
   describe("preserveOrder: true", function () {
@@ -300,6 +312,18 @@ describe("stopNodes Builder - Basic Tests", function () {
 
       expect(output).toContain('class="code"');
       expect(output).toContain("<pre>test > < &</pre>");
+    });
+
+    it("should preserve the sign of a negative zero value in raw stopNode content", function () {
+      const options = {
+        stopNodes: ["a"],
+        preserveOrder: true
+      };
+
+      const builder = new XMLBuilder(options);
+      const output = builder.build([{ a: [{ "#text": -0 }] }]);
+
+      expect(output).toEqual("<a>-0</a>");
     });
 
   });

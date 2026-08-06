@@ -386,6 +386,18 @@ describe("XMLBuilder", function () {
         expect(output).toContain('<h1>Nested</h1>');
     });
 
+    it("should preserve the sign of a negative zero text value", function () {
+        const builder = new XMLBuilder({ preserveOrder: true });
+        const result = builder.build([{ a: [{ "#text": -0 }] }]);
+        expect(result).toEqual(`<a>-0</a>`);
+    });
+
+    it("should preserve the sign of a negative zero attribute value", function () {
+        const builder = new XMLBuilder({ ignoreAttributes: false, preserveOrder: true });
+        const result = builder.build([{ a: [{ "#text": "v" }], ":@": { "@_x": -0 } }]);
+        expect(result).toEqual(`<a x="-0">v</a>`);
+    });
+
 });
 
 describe("XMLBuilder- array processing issue", function () {
