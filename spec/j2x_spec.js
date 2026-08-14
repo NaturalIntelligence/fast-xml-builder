@@ -688,4 +688,23 @@ describe("XMLBuilder", function () {
         expect(result).toEqual(expected);
     });
 
+    it("should preserve the sign of a negative zero tag value", function () {
+        const builder = new XMLBuilder();
+        const result = builder.build({ a: -0 });
+        expect(result).toEqual(`<a>-0</a>`);
+    });
+
+    it("should preserve the sign of a negative zero attribute value", function () {
+        const builder = new XMLBuilder({ ignoreAttributes: false });
+        const result = builder.build({ a: { "@_x": -0 } });
+        expect(result).toEqual(`<a x="-0"></a>`);
+    });
+
+    it("should preserve the sign of a negative zero value with oneListGroup", function () {
+        const jObj = { a: [-0, -0] };
+        const builder = new XMLBuilder({ oneListGroup: "true" });
+        const result = builder.build(jObj);
+        expect(result).toEqual(`<a>-0-0</a>`);
+    });
+
 });
