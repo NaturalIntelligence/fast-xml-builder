@@ -1,4 +1,7 @@
 
+**1.3.1** (2026-08-14)
+- fix: preserve negative sign for zero (By [rajanpanth](https://github.com/rajanpanth))
+
 **1.3.0** (2026-07-11)
 - upgrade:
   - xml-naming v0.3.0: cache support
