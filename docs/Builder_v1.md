@@ -302,7 +302,7 @@ const builder = new XMLBuilder({
 
 By default it is set to `false`. This means, builder will not santize the tag and attribute names. 
 
-Please note that we use [xml-entities](https://github.com/NaturalIntelligence/xml-entities) to validate tag and attribute names. This also consider xml version given in XML declaration. However, if not present then default version considered is 1.0.
+Please note that we use [xml-naming](https://github.com/NaturalIntelligence/xml-naming) to validate tag and attribute names. This also consider xml version given in XML declaration. However, if not present then default version considered is 1.0.
 
 ---
 
