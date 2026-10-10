@@ -246,7 +246,8 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
         } else if (item === null) {
           if (resolvedKey[0] === "?") val += this.indentate(level) + '<' + resolvedKey + '?' + this.tagEndChar;
           else val += this.indentate(level) + '<' + resolvedKey + '/' + this.tagEndChar;
-        } else if (typeof item === 'object') {
+        } else if (typeof item === 'object' && !(item instanceof Date)) {
+          // 2026-10-11: Recurse into objects; Date items retain their scalar text representation.
           if (this.options.oneListGroup) {
             // Push tag to matcher before recursive call
             matcher.push(resolvedKey);
