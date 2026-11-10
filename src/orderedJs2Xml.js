@@ -185,16 +185,12 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions, qName
             else xmlStr += tagStart + "/>";
         } else if ((!tagValue || tagValue.length === 0) && options.suppressEmptyNode) {
             xmlStr += tagStart + "/>";
-        } else if (tagValue && tagValue.endsWith(">")) {
-            xmlStr += tagStart + `>${tagValue}${indentation}</${tagName}>`;
+        } else if (indentation !== "" && !isStopNode && hasMarkupChild(tagObj[rawTagName], options)) {
+            // Each child is on a line of its own; a leading text or CDATA child has no line break yet
+            const lead = tagValue.startsWith(EOL) ? "" : newIdentation;
+            xmlStr += tagStart + `>${lead}${tagValue}${indentation}</${tagName}>`;
         } else {
-            xmlStr += tagStart + ">";
-            if (tagValue && indentation !== "" && (tagValue.includes("/>") || tagValue.includes("</"))) {
-                xmlStr += indentation + options.indentBy + tagValue + indentation;
-            } else {
-                xmlStr += tagValue;
-            }
-            xmlStr += `</${tagName}>`;
+            xmlStr += tagStart + `>${tagValue}</${tagName}>`;
         }
         isPreviousElementTag = true;
 
@@ -291,6 +287,22 @@ function attr_to_str_raw(attrMap, options) {
         }
     }
     return attrStr;
+}
+
+/**
+ * Whether the children contain an element, comment or processing instruction,
+ * which are written on lines of their own when formatting.
+ * @param {array} children
+ * @param {object} options
+ * @returns {boolean}
+ */
+function hasMarkupChild(children, options) {
+    if (!Array.isArray(children)) return false;
+    for (let i = 0; i < children.length; i++) {
+        const name = propName(children[i]);
+        if (name !== undefined && name !== options.textNodeName && name !== options.cdataPropName) return true;
+    }
+    return false;
 }
 
 function propName(obj) {
