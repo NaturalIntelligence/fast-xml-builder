@@ -427,3 +427,61 @@ describe("XMLBuilder- array processing issue", function () {
 
 
 });
+describe("XMLBuilder- formatting of mixed content", function () {
+    const options = {
+        preserveOrder: true,
+        format: true,
+        commentPropName: "#comment",
+        cdataPropName: "#cdata",
+    };
+    const text = (value) => [{ "#text": value }];
+
+    it("should not write a whitespace-only line when the content starts with a tag", function () {
+        const result = new XMLBuilder(options).build([{ p: [{ b: text("two") }, { "#text": "three" }] }]);
+        expect(result).toEqual(`
+<p>
+  <b>two</b>
+  three
+</p>`);
+    });
+
+    it("should write the closing tag on its own line when a comment is followed by text", function () {
+        const result = new XMLBuilder(options).build([{ q: [{ "#comment": text("c") }, { "#text": "three" }] }]);
+        expect(result).toEqual(`
+<q>
+  <!--c-->
+  three
+</q>`);
+    });
+
+    it("should indent text that is followed by a tag", function () {
+        const result = new XMLBuilder(options).build([{ r: [{ "#text": "one" }, { b: text("two") }] }]);
+        expect(result).toEqual(`
+<r>
+  one
+  <b>two</b>
+</r>`);
+    });
+
+    it("should not add whitespace to CDATA-only content", function () {
+        const result = new XMLBuilder(options).build([{ d: [{ "#cdata": text("a") }] }]);
+        expect(result).toEqual(`
+<d><![CDATA[a]]></d>`);
+    });
+
+    it("should not add whitespace to text that ends with >", function () {
+        const builder = new XMLBuilder(Object.assign({}, options, { processEntities: false }));
+        const result = builder.build([{ x: text("a>") }]);
+        expect(result).toEqual(`
+<x>a></x>`);
+    });
+
+    it("should not add whitespace to the content of a stop node", function () {
+        const builder = new XMLBuilder(Object.assign({}, options, { stopNodes: ["root.script"] }));
+        const result = builder.build([{ root: [{ script: [{ b: text("x") }] }] }]);
+        expect(result).toEqual(`
+<root>
+  <script><b>x</b></script>
+</root>`);
+    });
+});
