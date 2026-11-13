@@ -100,6 +100,9 @@ export default function Builder(options) {
   }
 }
 
+// 2026-10-11: Keep the declared named constructor available alongside the default export.
+export { Builder };
+
 /**
  * Detect XML version from the ?xml declaration at the root of a plain-object input.
  * Checks both attributesGroupName and flat attribute forms.
