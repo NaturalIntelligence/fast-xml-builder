@@ -31,7 +31,8 @@ const defaultOptions = {
     { regex: new RegExp(">", "g"), val: "&gt;" },
     { regex: new RegExp("<", "g"), val: "&lt;" },
     { regex: new RegExp("\'", "g"), val: "&apos;" },
-    { regex: new RegExp("\"", "g"), val: "&quot;" }
+    { regex: new RegExp("\"", "g"), val: "&quot;" },
+    { regex: new RegExp("\\r", "g"), val: "&#13;" }//a raw CR is folded to LF on parse (XML 1.0 2.11)
   ],
   processEntities: true,
   stopNodes: [],

@@ -148,3 +148,31 @@ describe("External Entities", function () {
         expect(output.replace(/\s+/g, "")).toEqual(expected.replace(/\s+/g, ""));
     });
 });
+
+describe("Carriage return", function () {
+    const CR = String.fromCharCode(13);   // U+000D
+    const LF = String.fromCharCode(10);   // U+000A
+    const TAB = String.fromCharCode(9);   // U+0009
+
+    it("escapes a carriage return as &#13; in text and attributes", function () {
+        const builder = new XMLBuilder({ ignoreAttributes: false });
+        expect(builder.build({ n: "A" + CR + "B" })).toEqual("<n>A&#13;B</n>");
+        expect(builder.build({ n: { "@_a": "A" + CR + "B" } })).toEqual(`<n a="A&#13;B"></n>`);
+    });
+
+    it("preserves a carriage return through a build -> parse round trip", function () {
+        // A raw CR would be silently folded to LF on parse (XML 1.0 2.11).
+        const builder = new XMLBuilder({ ignoreAttributes: false });
+        const parser = new XMLParser({ ignoreAttributes: false, htmlEntities: true });
+        for (const value of ["A" + CR + "B", "line1" + CR + LF + "line2"]) {
+            expect(parser.parse(builder.build({ n: value })).n).toEqual(value);
+            expect(parser.parse(builder.build({ n: { "@_a": value } })).n["@_a"]).toEqual(value);
+        }
+    });
+
+    it("leaves LF and TAB unescaped", function () {
+        const builder = new XMLBuilder();
+        expect(builder.build({ n: "A" + LF + "B" })).toEqual("<n>A" + LF + "B</n>");
+        expect(builder.build({ n: "A" + TAB + "B" })).toEqual("<n>A" + TAB + "B</n>");
+    });
+});
