@@ -226,8 +226,11 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
         if (typeof item === 'undefined') {
           // supress undefined node
         } else if (item === null) {
-          if (resolvedKey[0] === "?") val += this.indentate(level) + '<' + resolvedKey + '?' + this.tagEndChar;
-          else val += this.indentate(level) + '<' + resolvedKey + '/' + this.tagEndChar;
+          // Keep null entries in array order
+          const nullTag = this.indentate(level) + '<' + resolvedKey
+            + (resolvedKey[0] === "?" ? '?' : '/') + this.tagEndChar;
+          if (this.options.oneListGroup) val += nullTag;
+          else listTagVal += nullTag;
         } else if (typeof item === 'object') {
           if (this.options.oneListGroup) {
             // Push tag to matcher before recursive call
