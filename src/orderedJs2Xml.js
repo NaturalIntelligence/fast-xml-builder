@@ -157,7 +157,7 @@ function arrToStr(arr, options, indentation, matcher, stopNodeExpressions, qName
         // If this is a stopNode, get raw content without processing
         let tagValue;
         if (isStopNode) {
-            tagValue = getRawContent(tagObj[rawTagName], options, matcher.getDepth());
+            tagValue = getRawContent(tagObj[rawTagName], options, matcher.getDepth(), matcher, qNameValidator);
         } else {
             tagValue = arrToStr(tagObj[rawTagName], options, newIdentation, matcher, stopNodeExpressions, qNameValidator);
         }
@@ -214,7 +214,7 @@ function extractAttributeValues(attrMap, options) {
  * Extract raw content from a stopNode without any processing
  * This preserves the content exactly as-is, including special characters
  */
-function getRawContent(arr, options, depth = 0) {
+function getRawContent(arr, options, depth = 0, matcher = null, qNameValidator = null) {
     if (options.maxNestedTags && depth > options.maxNestedTags) {
         throw new Error("Maximum nested tags exceeded");
     }
@@ -244,14 +244,17 @@ function getRawContent(arr, options, depth = 0) {
             // Processing instruction - skip for stopNodes
             continue;
         } else if (tagName) {
-            // Nested tags within stopNode — no sanitizeName, content is raw
-            const attStr = attr_to_str_raw(item[":@"], options);
-            const nestedContent = getRawContent(item[tagName], options, depth + 1);
+            // Nested tags within stopNode — content is raw, but names are still sanitized
+            const resolvedTagName = (matcher && qNameValidator)
+                ? resolveName(tagName, false, options, matcher, qNameValidator)
+                : tagName;
+            const attStr = attr_to_str_raw(item[":@"], options, matcher, qNameValidator);
+            const nestedContent = getRawContent(item[tagName], options, depth + 1, matcher, qNameValidator);
 
             if (!nestedContent || nestedContent.length === 0) {
-                content += `<${tagName}${attStr}/>`;
+                content += `<${resolvedTagName}${attStr}/>`;
             } else {
-                content += `<${tagName}${attStr}>${nestedContent}</${tagName}>`;
+                content += `<${resolvedTagName}${attStr}>${nestedContent}</${resolvedTagName}>`;
             }
         }
     }
@@ -261,17 +264,21 @@ function getRawContent(arr, options, depth = 0) {
 /**
  * Build attribute string for stopNodes - NO entity replacement
  */
-function attr_to_str_raw(attrMap, options) {
+function attr_to_str_raw(attrMap, options, matcher = null, qNameValidator = null) {
     let attrStr = "";
     if (attrMap && !options.ignoreAttributes) {
         for (let attr in attrMap) {
             if (!Object.prototype.hasOwnProperty.call(attrMap, attr)) continue;
             // For stopNodes, use raw value without processing
+            let cleanAttrName = attr.substr(options.attributeNamePrefix.length);
             let attrVal = attrMap[attr];
+            if (matcher && qNameValidator) {
+                cleanAttrName = resolveName(cleanAttrName, true, options, matcher, qNameValidator);
+            }
             if (attrVal === true && options.suppressBooleanAttributes) {
-                attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}`;
+                attrStr += ` ${cleanAttrName}`;
             } else {
-                attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}="${escapeAttribute(attrVal)}"`;
+                attrStr += ` ${cleanAttrName}="${escapeAttribute(attrVal)}"`;
             }
         }
     }
@@ -297,11 +304,10 @@ function attr_to_str(attrMap, options, isStopNode, matcher, qNameValidator) {
         for (let attr in attrMap) {
             if (!Object.prototype.hasOwnProperty.call(attrMap, attr)) continue;
 
-            // Strip prefix to get the clean XML attribute name, then optionally sanitize it
+            // Strip prefix to get the clean XML attribute name, then optionally sanitize it.
+            // Names are always sanitized; only the VALUE stays raw for stopNodes.
             const cleanAttrName = attr.substr(options.attributeNamePrefix.length);
-            const resolvedAttrName = isStopNode
-                ? cleanAttrName  // stopNodes are raw — skip sanitizeName for attr names too
-                : resolveName(cleanAttrName, true, options, matcher, qNameValidator);
+            const resolvedAttrName = resolveName(cleanAttrName, true, options, matcher, qNameValidator);
 
             let attrVal;
             if (isStopNode) {

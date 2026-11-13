@@ -316,8 +316,8 @@ function processTextOrObjNode(object, key, level, matcher, qNameValidator) {
 
   if (isStopNode) {
     // For stopNodes, build raw content without entity encoding
-    const rawContent = this.buildRawContent(object, matcher.getDepth());
-    const attrStr = this.buildAttributesForStopNode(object);
+    const rawContent = this.buildRawContent(object, matcher.getDepth(), matcher, qNameValidator);
+    const attrStr = this.buildAttributesForStopNode(object, matcher, qNameValidator);
     matcher.pop();
     return this.buildObjectNode(rawContent, key, attrStr, level);
   }
@@ -372,7 +372,7 @@ Builder.prototype.extractAttributes = function (obj) {
 };
 
 // Build raw content for stopNode without entity encoding
-Builder.prototype.buildRawContent = function (obj, depth = 0) {
+Builder.prototype.buildRawContent = function (obj, depth = 0, matcher = null, qNameValidator = null) {
   if (this.options.maxNestedTags && depth >= this.options.maxNestedTags) {
     throw new Error("Maximum nested tags exceeded");
   }
@@ -400,6 +400,9 @@ Builder.prototype.buildRawContent = function (obj, depth = 0) {
     if (this.options.attributesGroupName && key === this.options.attributesGroupName) continue;
 
     const value = obj[key];
+    const rawKey = (matcher && qNameValidator)
+      ? resolveName(key, false, this.options, matcher, qNameValidator)
+      : key;
 
     if (key === this.options.textNodeName) {
       content += value; // Raw text
@@ -407,29 +410,29 @@ Builder.prototype.buildRawContent = function (obj, depth = 0) {
       // Array of same tag
       for (let item of value) {
         if (typeof item === 'string' || typeof item === 'number') {
-          content += `<${key}>${item}</${key}>`;
+          content += `<${rawKey}>${item}</${rawKey}>`;
         } else if (typeof item === 'object' && item !== null) {
-          const nestedContent = this.buildRawContent(item, depth + 1);
-          const nestedAttrs = this.buildAttributesForStopNode(item);
+          const nestedContent = this.buildRawContent(item, depth + 1, matcher, qNameValidator);
+          const nestedAttrs = this.buildAttributesForStopNode(item, matcher, qNameValidator);
           if (nestedContent === '') {
-            content += `<${key}${nestedAttrs}/>`;
+            content += `<${rawKey}${nestedAttrs}/>`;
           } else {
-            content += `<${key}${nestedAttrs}>${nestedContent}</${key}>`;
+            content += `<${rawKey}${nestedAttrs}>${nestedContent}</${rawKey}>`;
           }
         }
       }
     } else if (typeof value === 'object' && value !== null) {
       // Nested object
-      const nestedContent = this.buildRawContent(value, depth + 1);
-      const nestedAttrs = this.buildAttributesForStopNode(value);
+      const nestedContent = this.buildRawContent(value, depth + 1, matcher, qNameValidator);
+      const nestedAttrs = this.buildAttributesForStopNode(value, matcher, qNameValidator);
       if (nestedContent === '') {
-        content += `<${key}${nestedAttrs}/>`;
+        content += `<${rawKey}${nestedAttrs}/>`;
       } else {
-        content += `<${key}${nestedAttrs}>${nestedContent}</${key}>`;
+        content += `<${rawKey}${nestedAttrs}>${nestedContent}</${rawKey}>`;
       }
     } else {
       // Primitive value
-      content += `<${key}>${value}</${key}>`;
+      content += `<${rawKey}>${value}</${rawKey}>`;
     }
   }
 
@@ -437,7 +440,7 @@ Builder.prototype.buildRawContent = function (obj, depth = 0) {
 };
 
 // Build attribute string for stopNode (no entity encoding)
-Builder.prototype.buildAttributesForStopNode = function (obj) {
+Builder.prototype.buildAttributesForStopNode = function (obj, matcher = null, qNameValidator = null) {
   if (!obj || typeof obj !== 'object') return '';
 
   let attrStr = '';
@@ -447,10 +450,13 @@ Builder.prototype.buildAttributesForStopNode = function (obj) {
     const attrGroup = obj[this.options.attributesGroupName];
     for (let attrKey in attrGroup) {
       if (!Object.prototype.hasOwnProperty.call(attrGroup, attrKey)) continue;
-      const cleanKey = attrKey.startsWith(this.options.attributeNamePrefix)
+      let cleanKey = attrKey.startsWith(this.options.attributeNamePrefix)
         ? attrKey.substring(this.options.attributeNamePrefix.length)
         : attrKey;
       const val = attrGroup[attrKey];
+      if (matcher && qNameValidator) {
+        cleanKey = resolveName(cleanKey, true, this.options, matcher, qNameValidator);
+      }
       if (val === true && this.options.suppressBooleanAttributes) {
         attrStr += ' ' + cleanKey;
       } else {
@@ -466,12 +472,15 @@ Builder.prototype.buildAttributesForStopNode = function (obj) {
       const attr = this.isAttribute(key);
       if (attr) {
         const val = obj[key];
+        const resolvedAttr = (matcher && qNameValidator)
+          ? resolveName(attr, true, this.options, matcher, qNameValidator)
+          : attr;
         if (val === true && this.options.suppressBooleanAttributes) {
-          attrStr += ' ' + attr;
+          attrStr += ' ' + resolvedAttr;
         } else {
           // stopNode content is raw, but the quote delimiter is always escaped
           // so a quote in the value cannot break out of the attribute (see orderedJs2Xml attr_to_str)
-          attrStr += ' ' + attr + '="' + escapeAttribute(val) + '"';
+          attrStr += ' ' + resolvedAttr + '="' + escapeAttribute(val) + '"';
         }
       }
     }
