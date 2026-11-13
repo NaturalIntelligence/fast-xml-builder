@@ -244,7 +244,7 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
         if (typeof item === 'undefined') {
           // supress undefined node
         } else if (item === null) {
-          // 2026-10-11: Append repeated null nodes in array order.
+          // Keep null entries in array order
           const nullTag = this.indentate(level) + '<' + resolvedKey
             + (resolvedKey[0] === "?" ? '?' : '/') + this.tagEndChar;
           if (this.options.oneListGroup) val += nullTag;
