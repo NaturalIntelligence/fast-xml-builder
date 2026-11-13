@@ -405,3 +405,131 @@ describe("sanitizeName - processing instruction and callback result checks", fun
     expect(builder.build({ "1bad": "v" })).toEqual("<fixed>v</fixed>");
   });
 });
+// ---------------------------------------------------------------------------
+// Regression: sanitizeName must also apply inside stopNodes
+// (buildRawContent/buildAttributesForStopNode previously bypassed it)
+// ---------------------------------------------------------------------------
+describe("Builder — sanitizeName inside stopNodes", function () {
+
+  it("should sanitize tag names of elements nested inside a stopNode", function () {
+    const input = { root: { raw: { 'a onclick="alert(1)"': "x" } } };
+    const builder = new XMLBuilder({
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe("<root><raw><a_onclick__alert_1__>x</a_onclick__alert_1__></raw></root>");
+  });
+
+  it("should sanitize attribute names of elements nested inside a stopNode", function () {
+    const input = { root: { raw: { '#text': "content", '@_x" onmouseover="alert(1)': "y" } } };
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw x__onmouseover__alert_1_="y">content</raw></root>');
+  });
+
+  it("should sanitize attribute names from attributesGroupName inside a stopNode", function () {
+    const input = { root: { raw: { '#text': "content", '@attrs': { 'q" r="s': "v" } } } };
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      attributesGroupName: "@attrs",
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw q__r__s="v">content</raw></root>');
+  });
+
+  it("should leave valid names inside a stopNode unchanged", function () {
+    const input = { root: { raw: { b: "x", '#text': "t", "@_ok": "v" } } };
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw ok="v">t</raw></root>');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Regression: sanitizeName must also apply inside stopNodes (preserveOrder mode)
+// ---------------------------------------------------------------------------
+describe("Builder (ordered) — sanitizeName inside stopNodes", function () {
+
+  it("should sanitize nested tag names inside a stopNode (ordered)", function () {
+    const input = [
+      { root: [
+        { raw: [
+          { '#text': 'x' },
+          { 'a onclick="alert(1)': [{ '#text': 'y' }] },
+        ]},
+      ]}
+    ];
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe("<root><raw>x<a_onclick__alert_1_>y</a_onclick__alert_1_></raw></root>");
+  });
+
+  it("should sanitize attribute names on a stopNode itself (ordered)", function () {
+    const input = [
+      { root: [
+        { raw: [{ '#text': 'content' }], ':@': { '@_q" onmouseover="alert(1)': 'y' } },
+      ]}
+    ];
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw q__onmouseover__alert_1_="y">content</raw></root>');
+  });
+
+  it("should sanitize nested attribute names inside a stopNode (ordered)", function () {
+    const input = [
+      { root: [
+        { raw: [
+          { 'b': [{ '#text': 'z' }], ':@': { '@_q" onmouseover="alert(1)': 'y' } },
+        ]},
+      ]}
+    ];
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw><b q__onmouseover__alert_1_="y">z</b></raw></root>');
+  });
+
+  it("should leave valid names inside a stopNode unchanged (ordered)", function () {
+    const input = [
+      { root: [
+        { raw: [
+          { '#text': 't' },
+          { 'b': [{ '#text': 'z' }], ':@': { '@_ok': 'v' } },
+        ]},
+      ]}
+    ];
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      ignoreAttributes: false,
+      sanitizeName: (name) => xmlNamingSanitize(name),
+      stopNodes: ["root.raw"]
+    });
+    const output = builder.build(input);
+    expect(output).toBe('<root><raw>t<b ok="v">z</b></raw></root>');
+  });
+});
