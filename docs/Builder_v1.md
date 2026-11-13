@@ -13,6 +13,8 @@ const builder = new XMLBuilder(options);
 let xmlDataStr = builder.build(jObj);
 ```
 
+> **Security warning**: Tag and attribute names are written to the output as-is by default. Only values are escaped. If any key in your input object comes from an untrusted source (for example a parsed request body), a crafted key can inject arbitrary markup. Enable the name-sanitizing option and make it either rewrite or reject invalid names. Names are checked against the XML naming rules, and your callback runs only for names that fail the check. Whatever it returns is re-validated, and an invalid result throws.
+
 ---
 
 ## arrayNodeName
