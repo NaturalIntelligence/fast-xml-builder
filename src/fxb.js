@@ -231,7 +231,7 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
             + (resolvedKey[0] === "?" ? '?' : '/') + this.tagEndChar;
           if (this.options.oneListGroup) val += nullTag;
           else listTagVal += nullTag;
-        } else if (typeof item === 'object') {
+        } else if (typeof item === 'object' && !(item instanceof Date)) {
           if (this.options.oneListGroup) {
             // Push tag to matcher before recursive call
             matcher.push(resolvedKey);
