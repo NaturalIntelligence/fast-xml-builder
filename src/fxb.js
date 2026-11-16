@@ -100,6 +100,8 @@ export default function Builder(options) {
   }
 }
 
+export { Builder, Builder as XMLBuilder };
+
 /**
  * Detect XML version from the ?xml declaration at the root of a plain-object input.
  * Checks both attributesGroupName and flat attribute forms.

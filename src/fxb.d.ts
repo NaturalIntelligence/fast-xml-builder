@@ -261,9 +261,9 @@ export interface XMLBuilder {
 
 export interface XMLBuilderConstructor {
   new(options?: XmlBuilderOptions): XMLBuilder;
-  (options?: XmlBuilderOptions): XMLBuilder;
 }
 
+export declare const XMLBuilder: XMLBuilderConstructor;
 declare const Builder: XMLBuilderConstructor;
 
 export { Builder };
