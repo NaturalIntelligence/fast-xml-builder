@@ -142,8 +142,7 @@ Builder.prototype.build = function (jObj) {
   if (this.options.preserveOrder) {
     return buildFromOrderedJs(jObj, this.options);
   } else {
-    // 2026-10-11: XML names can be a single character.
-    if (Array.isArray(jObj) && this.options.arrayNodeName && this.options.arrayNodeName.length > 0) {
+    if (Array.isArray(jObj) && this.options.arrayNodeName) {
       jObj = {
         [this.options.arrayNodeName]: jObj
       }
