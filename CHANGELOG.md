@@ -1,4 +1,8 @@
 
+**1.3.2** (2026-11-13)
+- fix: maxNestedTags for stopNodes
+- fix: sanitize keys starting with '?'
+
 **1.3.1** (2026-08-14)
 - fix: preserve negative sign for zero (By [rajanpanth](https://github.com/rajanpanth))
 

@@ -13,6 +13,8 @@ const builder = new XMLBuilder(options);
 let xmlDataStr = builder.build(jObj);
 ```
 
+> **Security warning**: Tag and attribute names are written to the output as-is by default. Only values are escaped. If any key in your input object comes from an untrusted source (for example a parsed request body), a crafted key can inject arbitrary markup. Enable the name-sanitizing option and make it either rewrite or reject invalid names. Names are checked against the XML naming rules, and your callback runs only for names that fail the check. Whatever it returns is re-validated, and an invalid result throws.
+
 ---
 
 ## arrayNodeName
@@ -248,6 +250,10 @@ const builder = new XMLBuilder(options);
 const xmlOutput = builder.build(jsonData);
 ```
 
+The limit also applies to the contents of stop nodes. Although stop-node content is
+written raw, the builder still walks nested structures inside it, and that walk is
+bounded by the same limit.
+
 ---
 
 ## oneListGroup
@@ -313,7 +319,7 @@ Accepts an array of tag name strings or pre-compiled `Expression` instances from
 
 The old `*.tagName` wildcard syntax is still accepted and is automatically converted to the equivalent `..tagName` deep-wildcard expression.
 
-> This option is currently only supported with `preserveOrder: true`.
+> Supported in both modes (`preserveOrder: true` and `false`).
 
 A stop node may have raw content and attributes, but is not expected to have child nodes, CDATA, comments, or other structured properties.
 

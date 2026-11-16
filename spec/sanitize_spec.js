@@ -304,3 +304,104 @@ describe("Builder (preserveOrder) — sanitizeName option", function () {
     expect(output).toContain("<root>");
   });
 });
+
+describe("sanitizeName - processing instruction and callback result checks", function () {
+
+  const rewrite = (name) => xmlNamingSanitize(name);
+
+  // --- dangerous processing-instruction names ---
+
+  it("should rewrite a dangerous processing-instruction name (plain object)", function () {
+    const builder = new XMLBuilder({ sanitizeName: rewrite });
+    const output = builder.build({ "?x><script>": { "#text": "" }, root: "ok" });
+    expect(output).not.toContain("<script>");
+    expect(output).toContain("<?x__script_?>");
+  });
+
+  it("should rewrite a dangerous processing-instruction name (ordered)", function () {
+    const builder = new XMLBuilder({ preserveOrder: true, sanitizeName: rewrite });
+    const output = builder.build([
+      { "?x><script>": [{ "#text": "" }] },
+      { root: [{ "#text": "ok" }] }
+    ]);
+    expect(output).not.toContain("<script>");
+    expect(output).toContain("<?x__script_?>");
+  });
+
+  it("should throw on a dangerous processing-instruction name when the callback rejects (plain object)", function () {
+    const builder = new XMLBuilder({
+      sanitizeName: (name) => { throw new Error(`Invalid XML name: "${name}"`); }
+    });
+    expect(() => builder.build({ "?x><script>": { "#text": "" } }))
+      .toThrowError('Invalid XML name: "x><script>"');
+  });
+
+  it("should throw on a dangerous processing-instruction name when the callback rejects (ordered)", function () {
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      sanitizeName: (name) => { throw new Error(`Invalid XML name: "${name}"`); }
+    });
+    expect(() => builder.build([{ "?x><script>": [{ "#text": "" }] }]))
+      .toThrowError('Invalid XML name: "x><script>"');
+  });
+
+  // --- callback result is re-validated ---
+
+  it("should throw when the callback returns an invalid tag name (plain object)", function () {
+    const builder = new XMLBuilder({ sanitizeName: () => "a><script>" });
+    expect(() => builder.build({ "1bad": "v" })).toThrowError(/invalid XML name/);
+  });
+
+  it("should throw when the callback returns an invalid tag name (ordered)", function () {
+    const builder = new XMLBuilder({ preserveOrder: true, sanitizeName: () => "a><script>" });
+    expect(() => builder.build([{ "1bad": [{ "#text": "v" }] }])).toThrowError(/invalid XML name/);
+  });
+
+  it("should throw when the callback returns an invalid attribute name", function () {
+    const builder = new XMLBuilder({ ignoreAttributes: false, sanitizeName: () => 'x" onclick="y' });
+    expect(() => builder.build({ root: { "@_1attr": "v" } })).toThrowError(/invalid XML name/);
+  });
+
+  it("should throw when the callback returns something that is not a string", function () {
+    const builder = new XMLBuilder({ sanitizeName: () => undefined });
+    expect(() => builder.build({ "1bad": "v" })).toThrowError(/invalid XML name/);
+  });
+
+  it("should throw when the callback returns an invalid processing-instruction name", function () {
+    const builder = new XMLBuilder({ sanitizeName: () => "x><script>" });
+    expect(() => builder.build({ "?x y": { "#text": "" } })).toThrowError(/invalid XML name/);
+  });
+
+  // --- valid names must not reach the callback ---
+
+  it("should not call the callback for valid processing-instruction names (plain object)", function () {
+    const calls = [];
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      sanitizeName: (name) => { calls.push(name); return name; }
+    });
+    const output = builder.build({ "?xml": { "@_version": "1.0" }, root: "ok" });
+    expect(calls).toEqual([]);
+    expect(output).toContain('<?xml version="1.0"?>');
+  });
+
+  it("should not call the callback for valid processing-instruction names (ordered)", function () {
+    const calls = [];
+    const builder = new XMLBuilder({
+      preserveOrder: true,
+      ignoreAttributes: false,
+      sanitizeName: (name) => { calls.push(name); return name; }
+    });
+    const output = builder.build([
+      { "?xml": [], ":@": { "@_version": "1.0" } },
+      { root: [{ "#text": "ok" }] }
+    ]);
+    expect(calls).toEqual([]);
+    expect(output).toContain('<?xml version="1.0"?>');
+  });
+
+  it("should leave a valid callback result untouched", function () {
+    const builder = new XMLBuilder({ sanitizeName: () => "fixed" });
+    expect(builder.build({ "1bad": "v" })).toEqual("<fixed>v</fixed>");
+  });
+});
