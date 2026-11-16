@@ -124,7 +124,7 @@ Builder.prototype.build = function (jObj) {
   if (this.options.preserveOrder) {
     return buildFromOrderedJs(jObj, this.options);
   } else {
-    if (Array.isArray(jObj) && this.options.arrayNodeName && this.options.arrayNodeName.length > 1) {
+    if (Array.isArray(jObj) && this.options.arrayNodeName) {
       jObj = {
         [this.options.arrayNodeName]: jObj
       }
