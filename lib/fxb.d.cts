@@ -11,7 +11,7 @@ type Expression = unknown;
  * the parent Matcher's internal state so it always reflects the current parser
  * position with no copying or freezing.
  */
-class MatcherView {
+declare class MatcherView {
   readonly separator: string;
 
   /** Check if current path matches an Expression. */
@@ -262,9 +262,10 @@ interface XMLBuilder {
 
 interface XMLBuilderConstructor {
   new(options?: XmlBuilderOptions): XMLBuilder;
-  (options?: XmlBuilderOptions): XMLBuilder;
 }
 
+declare const XMLBuilder: XMLBuilderConstructor;
 declare const Builder: XMLBuilderConstructor;
 
-export = Builder;
+export { Builder, XMLBuilder };
+export default Builder;
