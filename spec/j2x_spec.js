@@ -215,6 +215,12 @@ describe("XMLBuilder", function () {
         expect(result).toEqual(expected);
     });
 
+    it("should ignore null and undefined values in grouped attributes", function () {
+        const jObj = { item: { $: { a: "x", b: null, c: undefined } } };
+        const builder = new XMLBuilder({ attributesGroupName: "$", attributeNamePrefix: "", ignoreAttributes: false });
+        const result = builder.build(jObj);
+        expect(result).toEqual('<item a="x"></item>');
+    });
     it("should format when parsing to XML", function () {
         const jObj = {
             a: {
