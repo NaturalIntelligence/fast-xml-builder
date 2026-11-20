@@ -282,9 +282,12 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
         const Ks = Object.keys(jObj[key]);
         const L = Ks.length;
         for (let j = 0; j < L; j++) {
+          const attrValue = jObj[key][Ks[j]];
+          if (attrValue == null) continue;
+
           // Resolve attribute names inside attributesGroupName
           const resolvedAttr = resolveName(Ks[j], true, this.options, matcher, qNameValidator);
-          attrStr += this.buildAttrPairStr(resolvedAttr, valToStr(jObj[key][Ks[j]]), isCurrentStopNode);
+          attrStr += this.buildAttrPairStr(resolvedAttr, valToStr(attrValue), isCurrentStopNode);
         }
       } else {
         val += this.processTextOrObjNode(jObj[key], resolvedKey, level, matcher, qNameValidator)
