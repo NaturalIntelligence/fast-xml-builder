@@ -156,16 +156,20 @@ Builder.prototype.j2x = function (jObj, level, matcher, qNameValidator) {
     // Special keys (textNodeName, cdataPropName, commentPropName, attributeNamePrefix,
     // attributesGroupName, "?" PI tags) are exempt — they are builder-internal conventions,
     // not user-supplied XML names.
-    const isSpecialKey = key === this.options.textNodeName
-      || key === this.options.cdataPropName
-      || key === this.options.commentPropName
-      || (this.options.attributesGroupName && key === this.options.attributesGroupName)
-      || this.isAttribute(key);
-    //|| key[0] === '?';
+    // Without sanitizeName every key is used as-is.
+    let resolvedKey = key;
+    if (this.options.sanitizeName) {
+      const isSpecialKey = key === this.options.textNodeName
+        || key === this.options.cdataPropName
+        || key === this.options.commentPropName
+        || (this.options.attributesGroupName && key === this.options.attributesGroupName)
+        || this.isAttribute(key);
+      //|| key[0] === '?';
 
-    const resolvedKey = isSpecialKey
-      ? key
-      : resolveName(key, false, this.options, matcher, qNameValidator);
+      if (!isSpecialKey) {
+        resolvedKey = resolveName(key, false, this.options, matcher, qNameValidator);
+      }
+    }
 
     if (typeof jObj[key] === 'undefined') {
       // supress undefined node only if it is not an attribute
